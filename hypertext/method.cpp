@@ -4,7 +4,7 @@
 
 namespace hypertext
 {
-	std::string to_spec_compliant_string(const hypertext::Method method)
+	std::string to_spec_compliant_string(const Method method)
 	{
 		static std::unordered_map<Method, std::string> string_by_method
 		{

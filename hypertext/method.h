@@ -27,5 +27,5 @@ namespace hypertext
 	 * Converts the method to an HTTP-compliant,
 	 * all-uppercase string.
 	 */
-	std::string to_spec_compliant_string(hypertext::Method method);
+	std::string to_spec_compliant_string(Method method);
 }
