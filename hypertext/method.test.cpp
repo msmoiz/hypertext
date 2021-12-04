@@ -1,4 +1,4 @@
-#include "methods.h"
+#include "method.h"
 
 #include <catch2/catch.hpp>
 
