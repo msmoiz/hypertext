@@ -8,7 +8,8 @@ add_library(hypertext
 target_include_directories(hypertext PRIVATE "hypertext")
 
 add_executable(tests
-	"hypertext/main.test.cpp")
+	"hypertext/main.test.cpp"
+	"hypertext/methods.test.cpp")
 target_include_directories(tests PRIVATE "hypertext")
 find_package(Catch2 REQUIRED)
 target_link_libraries(tests hypertext Catch2::Catch2)
