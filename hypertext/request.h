@@ -22,6 +22,7 @@ namespace hypertext
 		Value<std::string> host;
 		Value<int> port{80};
 		Value<std::string> resource{"/"};
+		Value<std::unordered_map<std::string, std::string>> parameters;
 		Value<Version> version{Version::OnePointOne};
 		Value<std::unordered_map<std::string, std::string>> headers;
 		Value<std::string> body;
@@ -41,9 +42,10 @@ namespace hypertext
 		RequestBuilder& port(const int port) { *request_.port = port; return *this; }
 		RequestBuilder& resource(std::string resource) { *request_.resource = std::move(resource); return *this; }
 		RequestBuilder& version(const Version version) { *request_.version = version; return *this; }
+		RequestBuilder& parameter(std::string key, std::string value) { (*request_.parameters)[std::move(key)] = std::move(value); return *this; }
 		RequestBuilder& header(std::string key, std::string value) { (*request_.headers)[std::move(key)] = std::move(value); return *this; }
 		RequestBuilder& body(std::string body) { *request_.body = std::move(body); return *this; }
-
+		
 		operator Request() { return std::move(request_); }
 		
 	private:
