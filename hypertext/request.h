@@ -19,7 +19,9 @@ namespace hypertext
 		static class RequestBuilder build();
 
 		Value<Method> method{Method::Get};
-		Value<std::string> uri;
+		Value<std::string> host;
+		Value<int> port{80};
+		Value<std::string> resource{"/"};
 		Value<Version> version{Version::OnePointOne};
 		Value<std::unordered_map<std::string, std::string>> headers;
 		Value<std::string> body;
@@ -35,7 +37,9 @@ namespace hypertext
 	public:
 
 		RequestBuilder& method(const Method method) { *request_.method = method; return *this; }
-		RequestBuilder& uri(std::string uri) { *request_.uri = std::move(uri); return *this; }
+		RequestBuilder& host(std::string host) { *request_.host = std::move(host); return *this; }
+		RequestBuilder& port(const int port) { *request_.port = port; return *this; }
+		RequestBuilder& resource(std::string resource) { *request_.resource = std::move(resource); return *this; }
 		RequestBuilder& version(const Version version) { *request_.version = version; return *this; }
 		RequestBuilder& header(std::string key, std::string value) { (*request_.headers)[std::move(key)] = std::move(value); return *this; }
 		RequestBuilder& body(std::string body) { *request_.body = std::move(body); return *this; }
