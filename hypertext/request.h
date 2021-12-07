@@ -37,7 +37,7 @@ namespace hypertext
 		 * Port on the host to send the request to.
 		 * Defaults to 80.
 		 */
-		Value<int> port{80};
+		Value<uint16_t> port{80};
 
 		/**
 		 * Resource targeted by the request.
@@ -82,7 +82,7 @@ namespace hypertext
 
 		RequestBuilder& method(const Method method) { *request_.method = method; return *this; }
 		RequestBuilder& host(std::string host) { *request_.host = std::move(host); return *this; }
-		RequestBuilder& port(const int port) { *request_.port = port; return *this; }
+		RequestBuilder& port(const uint16_t port) { *request_.port = port; return *this; }
 		RequestBuilder& resource(std::string resource) { *request_.resource = std::move(resource); return *this; }
 		RequestBuilder& version(const Version version) { *request_.version = version; return *this; }
 		RequestBuilder& parameter(std::string key, std::string value) { (*request_.parameters)[std::move(key)] = std::move(value); return *this; }
