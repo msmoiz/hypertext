@@ -8,7 +8,6 @@ namespace hypertext
 	{
 	public:
 		
-		Connection(std::string hostname, std::uint16_t port);
 		~Connection();
 
 		void send(std::string message);
@@ -16,6 +15,10 @@ namespace hypertext
 
 	private:
 
+		Connection(std::string hostname, std::uint16_t port);
+		
 		unsigned long long socket_;
+		
+		friend class ConnectionManager;
 	};
 }

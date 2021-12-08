@@ -2,11 +2,12 @@ cmake_minimum_required(VERSION 3.19)
 project(hypertext)
 
 add_library(hypertext
-    "hypertext/hypertext.cpp" 
+     
     "hypertext/method.cpp"
 	"hypertext/version.cpp"
 	"hypertext/connection.cpp"
-	"hypertext/dispatch.cpp")
+	"hypertext/client.cpp"
+	"hypertext/connection_manager.cpp")
 
 set_target_properties(hypertext PROPERTIES CXX_STANDARD 17)
 target_include_directories(hypertext PRIVATE "hypertext")
