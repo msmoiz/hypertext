@@ -8,6 +8,9 @@
 
 namespace hypertext
 {
+	/**
+	 * Represents an HTTP response.
+	 */
 	struct Response
 	{
 		template<typename T>
@@ -15,10 +18,31 @@ namespace hypertext
 
 		static class ResponseBuilder build();
 
+		/**
+		 * Version of HTTP used by the response.
+		 * Defaults to Version::OnePointOne.
+		 */
 		Value<Version> version{Version::OnePointOne};
+
+		/**
+		 * Status code returned by the response.
+		 * Defaults to StatusCode::Okay.
+		 */
 		Value<StatusCode> status_code{StatusCode::Okay};
+
+		/**
+		 * Status message returned by the response.
+		 */
 		Value<std::string> status_message;
+
+		/**
+		 * Headers returned by the response.
+		 */
 		Value<std::unordered_map<std::string, std::string>> headers;
+
+		/**
+		 * Body returned by the response.
+		 */
 		Value<std::string> body;
 
 	private:
