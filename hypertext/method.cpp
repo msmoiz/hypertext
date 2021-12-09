@@ -4,7 +4,7 @@
 
 namespace hypertext
 {
-	std::string to_spec_compliant_string(const Method method)
+	std::ostream& operator<<(std::ostream& stream, const Method method)
 	{
 		static std::unordered_map<Method, std::string> string_by_method
 		{
@@ -19,6 +19,6 @@ namespace hypertext
 			{Method::Trace, "TRACE"}
 		};
 
-		return string_by_method[method];
+		return stream << string_by_method[method];
 	}
 }

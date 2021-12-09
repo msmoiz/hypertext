@@ -10,35 +10,61 @@ namespace hypertext
 	{
 		auto connection = connection_manager_.spawn_connection(request.host, request.port);
 
-		std::stringstream ss;
-		ss	<< to_spec_compliant_string(Method::Get) << " "
-			<< request.resource();
+		auto raw_request = parse_request_to_string(request);
+		connection.send(std::move(raw_request));
+		auto raw_response = connection.receive();		
+		return parse_response_from_string(std::move(raw_response));
+	}
 
+	std::string Client::parse_request_to_string(const Request& request) const
+	{
+		static char space = ' ';
+		static std::string http_newline = "\r\n";
+		static char parameter_lead = '?';
+		static char parameter_key_val_separator = '=';
+		static char parameter_delimiter = '&';
+		static std::string header_key_val_separator = ": ";
+		
+		std::stringstream raw_request;
+
+		// Method
+		raw_request	<< request.method << space;
+
+		// Resource
+		raw_request << request.resource();
 		if (!request.parameters().empty())
 		{
-			ss << '?';
+			raw_request << parameter_lead;
 			for (auto it = request.parameters().begin(); it != request.parameters().end(); ++it)
 			{
-				ss << it->first << "=" << it->second;
+				raw_request << it->first << parameter_key_val_separator << it->second;
 				if (it != --request.parameters().end())
 				{
-					ss << "&";
+					raw_request << parameter_delimiter;
 				}
 			}
 		}
+		raw_request << space;
 
-		ss << " " << to_spec_compliant_string(request.version) << "\r\n";
+		// Version
+		raw_request << request.version << http_newline;
 
+		// Headers
 		for (const auto& [key, value] : request.headers())
 		{
-			ss << key << ": " << value << "\r\n";
+			raw_request << key << header_key_val_separator << value << http_newline;
 		}
-		
-		ss << "\r\n" << request.body();
-		
-		connection.send(ss.str());
-		const auto resp = connection.receive();
-		std::stringstream ss_resp{resp};
+		raw_request << http_newline;
+
+		// Body
+		raw_request << request.body();
+
+		return raw_request.str();
+	}
+
+	Response Client::parse_response_from_string(std::string raw_response) const
+	{
+		std::stringstream ss_resp{raw_response};
 
 		auto response = Response::build();
 		
@@ -72,7 +98,7 @@ namespace hypertext
 
 		std::string body{std::istreambuf_iterator{ss_resp}, {}};
 		response.body(body);
-		
+
 		return response;
 	}
 }

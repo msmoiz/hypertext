@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <ostream>
 
 namespace hypertext
 {
@@ -17,5 +17,5 @@ namespace hypertext
 	 * prefixed string in the form HTTP/{version},
 	 * where version is numeric.
 	 */
-	std::string to_spec_compliant_string(Version version);
+	std::ostream& operator<<(std::ostream& stream, Version version);
 }

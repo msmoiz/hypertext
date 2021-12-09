@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <ostream>
 
 namespace hypertext
 {
@@ -27,5 +27,5 @@ namespace hypertext
 	 * Converts the method to an HTTP-compliant,
 	 * all-uppercase string.
 	 */
-	std::string to_spec_compliant_string(Method method);
+	std::ostream& operator<<(std::ostream& stream, Method method);
 }
