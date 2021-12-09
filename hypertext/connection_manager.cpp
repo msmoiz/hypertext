@@ -15,9 +15,23 @@ namespace hypertext
 		}
 	}
 
+	ConnectionManager::ConnectionManager(ConnectionManager&& other) noexcept
+	{
+		other.should_cleanup_ = false;
+	}
+
+	ConnectionManager& ConnectionManager::operator=(ConnectionManager&& other) noexcept
+	{
+		other.should_cleanup_ = false;
+		return *this;
+	}
+
 	ConnectionManager::~ConnectionManager() noexcept
 	{
-		WSACleanup();
+		if (should_cleanup_)
+		{
+			WSACleanup();			
+		}
 	}
 
 	Connection ConnectionManager::spawn_connection(std::string hostname, const std::uint16_t port)
