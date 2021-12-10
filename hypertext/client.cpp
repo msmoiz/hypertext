@@ -21,12 +21,12 @@ namespace hypertext
 
 	std::string Client::parse_request_to_string(const Request& request) const
 	{
-		static char space = ' ';
-		static std::string http_newline = "\r\n";
-		static char parameter_lead = '?';
-		static char parameter_key_val_separator = '=';
-		static char parameter_delimiter = '&';
-		static std::string header_key_val_separator = ": ";
+		static const char space = ' ';
+		static const std::string http_newline = "\r\n";
+		static const char parameter_lead = '?';
+		static const char parameter_key_val_separator = '=';
+		static const char parameter_delimiter = '&';
+		static const std::string header_key_val_separator = ": ";
 		
 		std::stringstream raw_request;
 

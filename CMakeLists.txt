@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.19)
 project(hypertext)
 
 add_library(hypertext
-     
     "hypertext/method.cpp"
 	"hypertext/version.cpp"
 	"hypertext/connection.cpp"
@@ -19,3 +18,8 @@ add_executable(tests
 target_include_directories(tests PRIVATE "hypertext")
 find_package(Catch2 REQUIRED)
 target_link_libraries(tests hypertext Catch2::Catch2)
+
+add_executable(demo
+	"demo/main.cpp")
+target_include_directories(demo PRIVATE "hypertext")
+target_link_libraries(demo hypertext)
