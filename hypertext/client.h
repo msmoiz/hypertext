@@ -11,7 +11,15 @@ namespace hypertext
 	class Client
 	{
 	public:
-		
+
+		/**
+		 * Send an HTTP request and get the response.
+		 * Does not manipulate the request in any way,
+		 * including by adding or removing headers,
+		 * modifying or encoding the query parameters,
+		 * or running other interference.
+		 * Connection is discarded following request completion.
+		 */
 		Response dispatch(Request request);
 	};
 }
