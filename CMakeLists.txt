@@ -6,8 +6,7 @@ add_library(hypertext
     "hypertext/method.cpp"
 	"hypertext/version.cpp"
 	"hypertext/connection.cpp"
-	"hypertext/client.cpp"
-	"hypertext/connection_manager.cpp")
+	"hypertext/client.cpp")
 
 set_target_properties(hypertext PROPERTIES CXX_STANDARD 17)
 target_include_directories(hypertext PRIVATE "hypertext")

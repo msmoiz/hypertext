@@ -7,18 +7,21 @@ namespace hypertext
 	class Connection
 	{
 	public:
-		
-		~Connection();
-
-		void send(std::string message);
-		std::string receive();
-
-	private:
 
 		Connection(std::string hostname, std::uint16_t port);
+		Connection(const Connection& other) = delete;
+		Connection operator=(const Connection& other) = delete;
+		Connection(Connection&& other) noexcept;
+		Connection& operator=(Connection&& other) noexcept;
+		~Connection() noexcept;
+
+		void send(std::string message) const;
+		std::string receive() const;
+		void release();
+
+	private:
 		
-		unsigned long long socket_;
-		
-		friend class ConnectionManager;
+		std::size_t socket_{0};
+		bool should_cleanup_{true};
 	};
 }

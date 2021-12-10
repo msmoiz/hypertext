@@ -1,52 +1,81 @@
 #include "connection.h"
 
-#include <algorithm>
-
 #include <WinSock2.h>
+#include <WS2tcpip.h>
+
+#include "exceptions.h"
 
 namespace hypertext
 {
-	Connection::Connection(std::string hostname, std::uint16_t port)
+	Connection::Connection(std::string hostname, const std::uint16_t port)
 	{
-		// Create socket
-		socket_ = socket(AF_INET , SOCK_STREAM , 0 );
-
-		// Use DNS to get destination IP address
-		hostent* host_details = gethostbyname(hostname.c_str());
-		const auto addr_list = (struct in_addr **) host_details->h_addr_list;
-		char ip[100];
-		for(int i = 0; addr_list[i] != nullptr; i++) 
+		WSADATA wsa_data_throwaway;
+		if (const int err{WSAStartup(MAKEWORD(2, 2), &wsa_data_throwaway)}; err)
 		{
-			strcpy(ip , inet_ntoa(*addr_list[i]) );
+			throw Exception{"Failed to initialize Windows socket subsystem with error code (" + std::to_string(err) + ")"};
 		}
 
-		sockaddr_in server;
-		server.sin_addr.s_addr = inet_addr(ip);
-		server.sin_family = AF_INET;
-		server.sin_port = htons(port);
+		addrinfo hints{};
+		hints.ai_family = AF_INET; // IPv4
+		hints.ai_socktype = SOCK_STREAM; // TCP
+		hints.ai_protocol = IPPROTO_TCP; // TCP
+		addrinfo* addresses{};
+		if (const int err = getaddrinfo(hostname.c_str(), std::to_string(port).c_str(), &hints, &addresses); err)
+		{
+			throw Exception{"Failed to obtain host IP address with error code (" + std::to_string(WSAGetLastError()) + ")"};
+		}
 
-		// Initiate connection
-		connect(socket_, (struct sockaddr *)&server, sizeof(server));
+		if (socket_ = socket(hints.ai_family, hints.ai_socktype, hints.ai_protocol); socket_ == INVALID_SOCKET)
+		{
+			throw Exception{"Failed to initialize socket with error code (" + std::to_string(WSAGetLastError()) + ")"};
+		}
+		
+		if (const int err = connect(socket_, addresses[0].ai_addr, (int)addresses[0].ai_addrlen); err)
+		{
+			throw Exception{"Failed to establish connection with error code (" + std::to_string(WSAGetLastError()) + ")"};
+		}
+
+		freeaddrinfo(addresses);
 	}
 
-	Connection::~Connection()
+	Connection::Connection(Connection&& other) noexcept
 	{
-		shutdown(socket_, SD_BOTH);
-		closesocket(socket_);
+		other.should_cleanup_ = false;
 	}
 
-	void Connection::send(std::string message)
+	Connection& Connection::operator=(Connection&& other) noexcept
 	{
-		::send(socket_, message.c_str(), strlen(message.c_str()), 0);
+		other.should_cleanup_ = false;
+		return *this;
 	}
 
-	std::string Connection::receive()
+	Connection::~Connection() noexcept
 	{
-		char server_reply[4000];
-		int recv_size;
-		recv_size = ::recv(socket_, server_reply, 4000, 0);
-#undef min
-		server_reply[std::min(recv_size, 4000 - 1)] = '\0';
+		try { release(); } catch (...) { /* swallowed, not safe to throw from dtor */ }
+	}
+
+	void Connection::send(std::string message) const
+	{
+		::send(socket_, message.c_str(), (int)message.length(), 0);
+	}
+
+	std::string Connection::receive() const
+	{
+		constexpr int reply_size{4000};
+		char server_reply[reply_size];
+		const int recv_size = ::recv(socket_, server_reply, reply_size, 0);
+		server_reply[recv_size < reply_size - 1 ? recv_size : reply_size - 1] = '\0';
 		return server_reply;
+	}
+
+	void Connection::release()
+	{
+		if (should_cleanup_)
+		{
+			should_cleanup_ = false;
+			shutdown(socket_, SD_BOTH);
+			closesocket(socket_);
+			WSACleanup();
+		}
 	}
 }
