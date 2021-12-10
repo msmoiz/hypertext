@@ -1,5 +1,7 @@
 #include "connection.h"
 
+#include <optional>
+
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
@@ -61,11 +63,56 @@ namespace hypertext
 
 	std::string Connection::receive() const
 	{
-		constexpr int reply_size{4000};
-		char server_reply[reply_size];
-		const int recv_size = ::recv(socket_, server_reply, reply_size, 0);
-		server_reply[recv_size < reply_size - 1 ? recv_size : reply_size - 1] = '\0';
-		return server_reply;
+		std::string output;
+		std::optional<std::size_t> expected_body_length;
+		std::optional<std::size_t> start_of_body;
+		int last_received{0};
+
+		do
+		{
+			constexpr int buf_size{4000};
+			char buffer[buf_size];
+			last_received = ::recv(socket_, buffer, buf_size, 0);
+			if (last_received < buf_size)
+			{
+				buffer[last_received] = '\0';
+			}
+			output.append(buffer);
+
+			if (!expected_body_length)
+			{
+				if (const auto pos = output.find("Content-Length: "); pos != std::string::npos)
+				{
+					const auto eol_pos = output.find('\r', pos);
+					const auto line = output.substr(pos, eol_pos - pos);
+					expected_body_length = std::stoi(line.substr(16));
+				}
+			}
+
+			if (!start_of_body)
+			{
+				if (const auto pos = output.find("\r\n\r\n"); pos != std::string::npos)
+				{
+					start_of_body = pos + 4;
+				}
+			}
+
+			if (start_of_body && expected_body_length)
+			{
+				if (const auto body_length_so_far = output.length() - *start_of_body; body_length_so_far >= expected_body_length)
+				{
+					break;
+				}
+			}
+
+			if (start_of_body && !expected_body_length)
+			{
+				break;
+			}
+		}
+		while (last_received > 0);
+		
+		return output;
 	}
 
 	void Connection::release()
