@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ostream>
+#include <iostream>
 
 namespace hypertext
 {
@@ -9,7 +9,10 @@ namespace hypertext
 	 */
 	enum class Version
 	{
-		OnePointOne
+		OnePointOh,
+		OnePointOne,
+		Two,
+		Three
 	};
 
 	/**
@@ -18,4 +21,11 @@ namespace hypertext
 	 * where version is numeric.
 	 */
 	std::ostream& operator<<(std::ostream& stream, Version version);
+
+	/**
+	 * Parses the version from an HTTP-compliant,
+	 * prefixed string in the form HTTP/{version},
+	 * where version is numeric.
+	 */
+	std::istream& operator>>(std::istream& stream, Version& version);
 }

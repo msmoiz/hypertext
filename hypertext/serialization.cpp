@@ -60,12 +60,12 @@ namespace hypertext
 		// Status
 		std::getline(ss_raw_response, buffer);
 		{
-			std::string status_message;
+			Version version;
 			std::string status_code;
-			std::string version;
+			std::string status_message;
 			std::stringstream status_line{buffer};
 			status_line >> version >> status_code >> status_message;
-			response.version(Version::OnePointOne)
+			response.version(version)
 			        .status_code(StatusCode{std::stoi(status_code)})
 			        .status_message(status_message);
 		}

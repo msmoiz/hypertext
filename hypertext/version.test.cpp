@@ -12,3 +12,11 @@ TEST_CASE("HTTP version stringification method should return spec-compliant stri
 	ss << Version::OnePointOne;
 	REQUIRE(ss.str() == "HTTP/1.1");
 }
+
+TEST_CASE("HTTP version deserialization method works as expected")
+{
+	std::stringstream ss{"HTTP/1.0"};
+	Version version;
+	ss >> version;
+	REQUIRE(version == Version::OnePointOh);
+}
