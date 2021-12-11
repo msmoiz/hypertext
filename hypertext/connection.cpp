@@ -64,6 +64,7 @@ namespace hypertext
 	std::string Connection::receive() const
 	{
 		std::string output;
+		std::optional<std::string> transfer_encoding;
 		std::optional<std::size_t> expected_body_length;
 		std::optional<std::size_t> start_of_body;
 		int last_received{0};
@@ -79,6 +80,16 @@ namespace hypertext
 			}
 			output.append(buffer);
 
+			if (!transfer_encoding)
+			{
+				if (const auto pos = output.find("Transfer-Encoding: "); pos != std::string::npos)
+				{
+					const auto eol_pos = output.find('\r', pos);
+					const auto line = output.substr(pos, eol_pos - pos);
+					transfer_encoding = line.substr(19);
+				}
+			}
+			
 			if (!expected_body_length)
 			{
 				if (const auto pos = output.find("Content-Length: "); pos != std::string::npos)
@@ -97,6 +108,14 @@ namespace hypertext
 				}
 			}
 
+			if (start_of_body && transfer_encoding && transfer_encoding == "chunked")
+			{
+				if (output.find("0\r\n\r\n", *start_of_body) != std::string::npos)
+				{
+					break;
+				}
+			}
+
 			if (start_of_body && expected_body_length)
 			{
 				if (const auto body_length_so_far = output.length() - *start_of_body; body_length_so_far >= expected_body_length)
@@ -105,7 +124,7 @@ namespace hypertext
 				}
 			}
 
-			if (start_of_body && !expected_body_length)
+			if (start_of_body && !transfer_encoding && !expected_body_length)
 			{
 				break;
 			}
