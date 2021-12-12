@@ -63,75 +63,18 @@ namespace hypertext
 
 	std::string Connection::receive() const
 	{
-		std::string output;
-		std::optional<std::string> transfer_encoding;
-		std::optional<std::size_t> expected_body_length;
-		std::optional<std::size_t> start_of_body;
+		constexpr int buf_size{4000};
+		char buffer[buf_size];
 		int last_received{0};
 
-		do
+		last_received = ::recv(socket_, buffer, buf_size - 1, 0);
+		if (last_received == 0)
 		{
-			constexpr int buf_size{4000};
-			char buffer[buf_size];
-			last_received = ::recv(socket_, buffer, buf_size, 0);
-			if (last_received < buf_size)
-			{
-				buffer[last_received] = '\0';
-			}
-			output.append(buffer);
-
-			if (!transfer_encoding)
-			{
-				if (const auto pos = output.find("Transfer-Encoding: "); pos != std::string::npos)
-				{
-					const auto eol_pos = output.find('\r', pos);
-					const auto line = output.substr(pos, eol_pos - pos);
-					transfer_encoding = line.substr(19);
-				}
-			}
-			
-			if (!expected_body_length)
-			{
-				if (const auto pos = output.find("Content-Length: "); pos != std::string::npos)
-				{
-					const auto eol_pos = output.find('\r', pos);
-					const auto line = output.substr(pos, eol_pos - pos);
-					expected_body_length = std::stoi(line.substr(16));
-				}
-			}
-
-			if (!start_of_body)
-			{
-				if (const auto pos = output.find("\r\n\r\n"); pos != std::string::npos)
-				{
-					start_of_body = pos + 4;
-				}
-			}
-
-			if (start_of_body && transfer_encoding && transfer_encoding == "chunked")
-			{
-				if (output.find("0\r\n\r\n", *start_of_body) != std::string::npos)
-				{
-					break;
-				}
-			}
-
-			if (start_of_body && expected_body_length)
-			{
-				if (const auto body_length_so_far = output.length() - *start_of_body; body_length_so_far >= expected_body_length)
-				{
-					break;
-				}
-			}
-
-			if (start_of_body && !transfer_encoding && !expected_body_length)
-			{
-				break;
-			}
+			throw Exception{"Connection closed by server."};
 		}
-		while (last_received > 0);
 		
-		return output;
+		buffer[last_received] = '\0';
+		return buffer;
 	}
 
 	void Connection::release()
