@@ -49,45 +49,4 @@ namespace hypertext
 
 		return raw_request.str();
 	}
-
-	Response parse_response_from_string(std::string raw_response)
-	{
-		auto response = Response::build();
-		
-		std::stringstream ss_raw_response{raw_response};
-		std::string buffer;
-
-		// Status
-		std::getline(ss_raw_response, buffer);
-		{
-			Version version;
-			std::string status_code;
-			std::string status_message;
-			std::stringstream status_line{buffer};
-			status_line >> version >> status_code >> status_message;
-			response.version(version)
-			        .status_code(StatusCode{std::stoi(status_code)})
-			        .status_message(status_message);
-		}
-
-		// Headers
-		while (ss_raw_response.peek() != '\r')
-		{
-			std::getline(ss_raw_response, buffer);
-			std::stringstream header_line{buffer};
-
-			std::string key, value;
-			std::getline(header_line, key, ':');
-			header_line.ignore(1); // Space following delimiter ':'
-			header_line >> value;
-			response.header(key, value);
-		}
-		ss_raw_response.ignore(2); // "\r\n"
-
-		// Body
-		std::string body{std::istreambuf_iterator{ss_raw_response}, {}};
-		response.body(body);
-
-		return response;
-	}
 }
