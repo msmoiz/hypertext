@@ -1,3 +1,5 @@
+// Copyright 2021 Mustafa Moiz.
+
 #pragma once
 
 #include "request.h"

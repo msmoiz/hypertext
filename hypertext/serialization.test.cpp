@@ -1,3 +1,5 @@
+// Copyright 2021 Mustafa Moiz.
+
 #include <catch2/catch.hpp>
 
 #include "serialization.h"

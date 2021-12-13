@@ -1,3 +1,5 @@
+// Copyright 2021 Mustafa Moiz.
+
 #include <iostream>
 
 #include "client.h"

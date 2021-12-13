@@ -1,3 +1,5 @@
+// Copyright 2021 Mustafa Moiz.
+
 #include "method.h"
 
 #include <unordered_map>
